@@ -2,6 +2,15 @@ const app = require("./app");
 const dotenv = require("dotenv");
 const connectDatabase = require("./Config/database");
 
+process.on("uncaughtException", (e) => {
+  console.log("error =>", e.message);
+  console.log("Shutting down the server due to uncaughtException.");
+
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
 dotenv.config({ path: "Backend/Config/.env" });
 connectDatabase();
 

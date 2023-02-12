@@ -1,5 +1,6 @@
 const asyncFn = require("../Middleware/asyncErros");
 const Product = require("../Model/productModel");
+const ApiFeatues = require("../utils/apiFeatures");
 const ErrorHandler = require("../utils/errorHandler");
 
 const createProduct = asyncFn(async (req, res, next) => {
@@ -11,7 +12,12 @@ const createProduct = asyncFn(async (req, res, next) => {
 });
 
 const getAllProducts = asyncFn(async (req, res, next) => {
-  const products = await Product.find();
+  const pageLimit = 5;
+  const apiFeature = new ApiFeatues(Product.find(), req.query)
+    .search()
+    .filter()
+    .pagination(pageLimit);
+  const products = await apiFeature.query;
   return res.status(200).json({
     success: true,
     products,
