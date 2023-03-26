@@ -4,16 +4,22 @@ const { sendEmail } = require("../utils/sendEmail");
 const User = require("../Model/userModel");
 const jwtTokens = require("../utils/jwtTokens");
 const crypto = require("crypto");
+const cloudinary = require("cloudinary");
 
 const registerUser = asyncFn(async (req, res, next) => {
+  const myCloud = await cloudinary.v2.uploader.upload({
+    folder: "avatars",
+    width: 150,
+    crop: "scale",
+  });
   const { name, email, password } = req.body;
   const user = await User.create({
     name,
     email,
     password,
     avatar: {
-      public_id: "thiss is for test",
-      url: "test123",
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
     },
   });
 
@@ -159,6 +165,23 @@ const updateProfile = asyncFn(async (req, res, next) => {
   let user = await User.find(req.user.id);
   if (!user) {
     return next(new ErrorHandler("User not found", 400));
+  }
+
+  if (req.body.avatar !== "") {
+    const user = await User.findById(req.user.id);
+    const userProfile = user.avatar.public_id;
+
+    await cloudinary.v2.uploader.destroy(userProfile);
+
+    const myCloud = await cloudinary.v2.uploader.upload({
+      folder: "avatars",
+      width: 150,
+      crop: "scale",
+    });
+    user.avatar = {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
   }
 
   user = await User.findByIdAndUpdate(req.user.id, userData, {

@@ -13,15 +13,23 @@ const createProduct = asyncFn(async (req, res, next) => {
 });
 
 const getAllProducts = asyncFn(async (req, res, next) => {
-  const pageLimit = 5;
+  const resultPerPage = 5;
+  const productCount = await Product.countDocuments();
   const apiFeature = new ApiFeatues(Product.find(), req.query)
     .search()
-    .filter()
-    .pagination(pageLimit);
-  const products = await apiFeature.query;
+    .filter();
+
+  let products = await apiFeature.query;
+  const filteredProductsCount = products.length;
+  apiFeature.pagination(resultPerPage);
+
+  products = await apiFeature.query;
   return res.status(200).json({
     success: true,
     products,
+    productCount,
+    resultPerPage,
+    filteredProductsCount,
   });
 });
 
