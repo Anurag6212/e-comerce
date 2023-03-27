@@ -1,4 +1,5 @@
 const express = require("express");
+const { getAdminProduct } = require("../../frontend/src/actions/productAction");
 const {
   getAllProducts,
   createProduct,
@@ -16,6 +17,10 @@ const router = express.Router();
 router
   .route("/admin/product/new")
   .post(auth, authorizeRole("admin"), createProduct);
+
+router
+  .route("/admin/products")
+  .get(auth, authorizeRole("admin"), getAdminProduct);
 
 router.route("/product").get(auth, getAllProducts);
 
